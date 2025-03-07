@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  name     String
+  role     Role    @default(USER)
+  createdAt DateTime @default(now())
+
+  reservations Reservation[]
+}
+
+model Class {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  genre       String
+  duration    Int
+  releaseDate DateTime
+  createdAt   DateTime @default(now())
+
+  schedules Schedule[]
+}
+
+model Schedule {
+  id             Int     @id @default(autoincrement())
+  classId        Int
+  scheduleTime   DateTime
+  totalSeats     Int
+  availableSeats Int
+  createdAt      DateTime @default(now())
+
+  class         Class   @relation(fields: [classId], references: [id])
+  reservations  Reservation[]
+}
+
+model Reservation {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  scheduleId  Int
+  seats       Int
+  status      ReservationStatus @default(CONFIRMED)
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  schedule  Schedule @relation(fields: [scheduleId], references: [id])
+}
+
+enum Role {
+  USER
+  TUTOR
+  ADMIN
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELED
+}
