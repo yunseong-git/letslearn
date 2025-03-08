@@ -51,45 +51,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserService = void 0;
+exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const user_service_1 = require("../user/user.service");
 const bcrypt = __importStar(require("bcrypt"));
-let UserService = class UserService {
-    constructor(prisma) {
-        this.prisma = prisma;
+const jwt_1 = require("@nestjs/jwt");
+let AuthService = class AuthService {
+    constructor(userService, jwtService) {
+        this.userService = userService;
+        this.jwtService = jwtService;
     }
-    createUser(email_1, password_1, name_1) {
-        return __awaiter(this, arguments, void 0, function* (email, password, name, role = 'USER') {
-            const hashedPassword = yield bcrypt.hash(password, 10); // 🔐 비밀번호 해싱
-            return this.prisma.user.create({
-                data: { email, password: hashedPassword, name, role },
-            });
+    validateUser(email, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.userService.getUserByEmail(email);
+            if (!user)
+                throw new common_1.UnauthorizedException('이메일이 존재하지 않습니다.');
+            const isPasswordValid = yield bcrypt.compare(password, user.password);
+            if (!isPasswordValid)
+                throw new common_1.UnauthorizedException('비밀번호가 틀렸습니다.');
+            return { id: user.id, email: user.email, role: user.role };
         });
     }
-    getUsers() {
+    login(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.prisma.user.findMany();
-        });
-    }
-    getUserById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.prisma.user.findUnique({
-                where: { id },
-            });
-        });
-    }
-    getUserByEmail(email) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.prisma.user.findUnique({
-                where: { email },
-            });
+            const payload = { email: user.email, sub: user.id, role: user.role };
+            return { access_token: this.jwtService.sign(payload) };
         });
     }
 };
-exports.UserService = UserService;
-exports.UserService = UserService = __decorate([
+exports.AuthService = AuthService;
+exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
-], UserService);
-//# sourceMappingURL=user.service.js.map
+    __metadata("design:paramtypes", [user_service_1.UserService,
+        jwt_1.JwtService])
+], AuthService);
+//# sourceMappingURL=auth.service.js.map

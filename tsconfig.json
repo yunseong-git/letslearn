@@ -1,19 +1,51 @@
 {
     "compilerOptions": {
-      "module": "commonjs",
-      "target": "es6",
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "baseUrl": "./src",
-      "paths": { "*": ["*"] },
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
+      "module": "commonjs",  
+      // 모듈 시스템을 CommonJS로 설정 (Node.js 환경에서 사용)
+
+      "target": "es6", 
+      // 컴파일된 JavaScript 코드의 대상 버전을 ES6로 설정
+
+      "outDir": "./dist", 
+      // 컴파일된 파일이 저장될 디렉토리 지정 (출력 폴더)
+
+      "rootDir": "./src", 
+      // TypeScript 소스 파일이 위치한 디렉토리 지정 (입력 폴더)
+
+      "baseUrl": "./src", 
+      // `import` 경로의 기준이 되는 폴더 설정 (절대 경로 설정 시 유용)
+
+      "paths": { "*": ["*"] }, 
+      // 모듈 경로 매핑 (현재 설정은 모든 모듈을 동일한 방식으로 처리)
+
+      "emitDecoratorMetadata": true, 
+      // 데코레이터 사용 시 런타임에 메타데이터를 추가 (NestJS 필수)
+
+      "experimentalDecorators": true, 
+       // 데코레이터 기능을 활성화 (NestJS 필수)
+       // 기본적으로 typescript에서는 데코레이터가 experimental(실험적)인 기능으로 간주
+
       "sourceMap": true,
+      // 컴파일된 JS 파일과 TypeScript 원본 간의 매핑을 생성 (디버깅 용이)
+
       "strict": true,
-      "esModuleInterop": true,
+      // 엄격한 타입 검사를 활성화 (권장됨, 코드 안정성 증가)
+      //만약 너무 많은 오류가 발생한다면 일부 옵션을 완화할 수 있음.
+      // ex) "strict": false 또는 "strict": true 유지하고 "noImplicitAny": true로 설정하여 강력한 타입 검사 유지.
+
       "noImplicitAny": false,
+      // 암시적 `any` 타입 사용 허용 (`true`로 하면 타입 미지정 시 오류 발생)
+
+      "esModuleInterop": true,
+      // CommonJS 모듈을 ES6 모듈처럼 `import` 가능하게 함
+      
       "skipLibCheck": true
+      // `node_modules` 내의 타입 정의 파일 검사 건너뛰기 (컴파일 속도 향상)
     },
+
     "include": ["src/**/*"],
+    // 포함할 파일 및 디렉토리 지정 (`src` 폴더 내 모든 파일 포함)
+
     "exclude": ["node_modules"]
+    // 제외할 파일 및 디렉토리 지정 (`node_modules` 내 파일 제외)
   }

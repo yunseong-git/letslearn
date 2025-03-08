@@ -8,14 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const prisma_module_1 = require("./prisma/prisma.module");
 const user_module_1 = require("./user/user.module");
+const auth_module_1 = require("./auth/auth.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, user_module_1.UserModule],
+        imports: [
+            config_1.ConfigModule.forRoot({ isGlobal: true }), // 전역으로 환경변수 설정
+            prisma_module_1.PrismaModule,
+            user_module_1.UserModule,
+            auth_module_1.AuthModule
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
