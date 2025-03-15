@@ -3,20 +3,23 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { JwtStrategy } from './jwt.strategy';
-
-import { UserModule } from '../user/user.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 
+import { PrismaModule } from 'common/prisma/prisma.module';
+import { UserModule } from '../user/user.module';
+
+import { JwtStrategy } from './jwt.strategy';
+
 @Module({
   imports: [
+    PrismaModule,
     UserModule,
 
     ConfigModule,
-    PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({ //async방식 jwt
+      imports: [ConfigModule], //async방식이기에 한번더 import 필요
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
@@ -25,7 +28,7 @@ import { AuthController } from './auth.controller';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy], // ✅ JwtStrategy 추가
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService, JwtModule],
 })
-export class AuthModule {}
+export class AuthModule { }

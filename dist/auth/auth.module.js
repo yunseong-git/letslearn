@@ -20,21 +20,23 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const passport_1 = require("@nestjs/passport");
 const config_1 = require("@nestjs/config");
-const jwt_strategy_1 = require("./jwt.strategy");
-const user_module_1 = require("../user/user.module");
 const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
+const prisma_module_1 = require("../common/prisma/prisma.module");
+const user_module_1 = require("../user/user.module");
+const jwt_strategy_1 = require("./jwt.strategy");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            prisma_module_1.PrismaModule,
             user_module_1.UserModule,
             config_1.ConfigModule,
-            passport_1.PassportModule,
+            passport_1.PassportModule.register({ defaultStrategy: 'jwt' }),
             jwt_1.JwtModule.registerAsync({
-                imports: [config_1.ConfigModule],
+                imports: [config_1.ConfigModule], //async방식이기에 한번더 import 필요
                 inject: [config_1.ConfigService],
                 useFactory: (configService) => __awaiter(void 0, void 0, void 0, function* () {
                     return ({
@@ -45,8 +47,8 @@ exports.AuthModule = AuthModule = __decorate([
             }),
         ],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy], // ✅ JwtStrategy 추가
-        exports: [auth_service_1.AuthService],
+        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy],
+        exports: [auth_service_1.AuthService, jwt_1.JwtModule],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

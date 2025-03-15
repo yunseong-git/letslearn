@@ -26,15 +26,19 @@ const config_1 = require("@nestjs/config");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor(configService) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(), // ✅ Bearer 토큰에서 JWT 추출
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(), // Bearer 토큰에서 JWT 추출
             ignoreExpiration: false, // ✅ 토큰 만료 확인
-            secretOrKey: configService.get('JWT_SECRET'), // ✅ .env에서 JWT_SECRET 가져오기
+            secretOrKey: configService.get('JWT_SECRET'), // .env에서 JWT_SECRET 가져오기
         });
         this.configService = configService;
     }
     validate(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            return { userId: payload.sub, email: payload.email, role: payload.role }; // ✅ req.user에 저장되는 값
+            console.log('🚀 JWT Payload:', payload); // ✅ 여기에서 JWT payload 확인!
+            if (!payload) {
+                console.log('❌ JWT Payload 없음!'); // 🚨 JWT가 잘못된 경우 로그 출력
+            }
+            return { id: payload.id, email: payload.email, role: payload.role }; // ✅ req.user에 저장되는 값
         });
     }
 };

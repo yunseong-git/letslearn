@@ -8,10 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
+const auth_guard_1 = require("./auth/guards/auth.guard");
+const role_guard_1 = require("./auth/guards/role.guard");
 const config_1 = require("@nestjs/config");
-const prisma_module_1 = require("./prisma/prisma.module");
+const prisma_module_1 = require("./common/prisma/prisma.module");
 const user_module_1 = require("./user/user.module");
 const auth_module_1 = require("./auth/auth.module");
+const class_module_1 = require("./class/class.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -21,7 +25,18 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({ isGlobal: true }), // 전역으로 환경변수 설정
             prisma_module_1.PrismaModule,
             user_module_1.UserModule,
-            auth_module_1.AuthModule
+            auth_module_1.AuthModule,
+            class_module_1.ClassModule,
+        ],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: auth_guard_1.JwtAuthGuard, // ✅ `JwtAuthGuard`를 전역 가드로 설정!
+            },
+            {
+                provide: core_1.APP_GUARD,
+                useClass: role_guard_1.RoleGuard,
+            },
         ],
     })
 ], AppModule);

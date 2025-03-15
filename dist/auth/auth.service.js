@@ -54,10 +54,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("../user/user.service");
+const prisma_service_1 = require("../common/prisma/prisma.service");
 const bcrypt = __importStar(require("bcrypt"));
 const jwt_1 = require("@nestjs/jwt");
 let AuthService = class AuthService {
-    constructor(userService, jwtService) {
+    constructor(prisma, userService, jwtService) {
+        this.prisma = prisma;
         this.userService = userService;
         this.jwtService = jwtService;
     }
@@ -72,9 +74,28 @@ let AuthService = class AuthService {
             return { id: user.id, email: user.email, role: user.role };
         });
     }
+    signup(email, password, name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            //중복확인
+            const existingUser = yield this.userService.getUserByEmail(email);
+            if (existingUser) {
+                throw new common_1.UnauthorizedException('이미 존재하는 이메일입니다.');
+            }
+            const hashedPassword = yield bcrypt.hash(password, 12);
+            const user = yield this.prisma.user.create({
+                data: { email, password: hashedPassword, name },
+            });
+            const payload = { email: user.email, id: user.id, role: user.role };
+            return {
+                message: '회원가입 성공',
+                access_token: this.jwtService.sign(payload),
+            };
+        });
+    }
     login(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const payload = { email: user.email, sub: user.id, role: user.role };
+            const payload = { email: user.email, id: user.id, role: user.role };
+            console.log('🚀 JWT 발급 Payload:', payload); // ✅ 디버깅 추가!
             return { access_token: this.jwtService.sign(payload) };
         });
     }
@@ -82,7 +103,8 @@ let AuthService = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [user_service_1.UserService,
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        user_service_1.UserService,
         jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

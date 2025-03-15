@@ -16,6 +16,7 @@ model User {
   createdAt DateTime @default(now())
 
   reservations Reservation[]
+  classes      Class[]  @relation("UserClasses") // ✅ TUTOR가 생성한 강의 목록
 }
 
 model Class {
@@ -24,10 +25,13 @@ model Class {
   description String?
   genre       String
   duration    Int
-  releaseDate DateTime
+  releaseDate DateTime @default(now()) // ✅ 기본값 추가
   createdAt   DateTime @default(now())
 
-  schedules Schedule[]
+  tutorId     Int      // ✅ 강의를 만든 TUTOR의 ID 추가
+  tutor       User     @relation("UserClasses", fields: [tutorId], references: [id]) // ✅ TUTOR와 관계 설정
+
+  schedules   Schedule[]
 }
 
 model Schedule {

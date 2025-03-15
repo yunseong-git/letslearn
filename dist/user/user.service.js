@@ -53,36 +53,80 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const prisma_service_1 = require("../common/prisma/prisma.service");
 const bcrypt = __importStar(require("bcrypt"));
 let UserService = class UserService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    createUser(email_1, password_1, name_1) {
-        return __awaiter(this, arguments, void 0, function* (email, password, name, role = 'USER') {
-            const hashedPassword = yield bcrypt.hash(password, 10); // 🔐 비밀번호 해싱
-            return this.prisma.user.create({
-                data: { email, password: hashedPassword, name, role },
-            });
-        });
-    }
     getUsers() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.prisma.user.findMany();
+            try {
+                return yield this.prisma.user.findMany();
+            }
+            catch (error) {
+                console.error('Error fetching users:', error);
+                throw new Error('Failed to fetch users');
+            }
         });
     }
     getUserById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.prisma.user.findUnique({
-                where: { id },
-            });
+            if (!id) {
+                throw new Error('User ID is required');
+            }
+            try {
+                return yield this.prisma.user.findUnique({
+                    where: { id },
+                });
+            }
+            catch (error) {
+                console.error('Error fetching user by ID:', error);
+                throw new Error('Failed to retrieve user');
+            }
         });
     }
     getUserByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.prisma.user.findUnique({
-                where: { email },
+            const lowerCaseEmail = email.toLowerCase(); // 이메일 소문자 변환
+            try {
+                return yield this.prisma.user.findUnique({
+                    where: { email: lowerCaseEmail },
+                });
+            }
+            catch (error) {
+                console.error('Error fetching user by email:', error);
+                throw new Error('Failed to retrieve user');
+            }
+        });
+    }
+    updatePwd(id, newPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!id || !newPassword) {
+                throw new Error('User ID and new password are required.');
+            }
+            const user = yield this.prisma.user.findUnique({ where: { id } });
+            if (!user) {
+                throw new Error('User not found.');
+            }
+            const hashedPassword = yield bcrypt.hash(newPassword, 12);
+            try {
+                return yield this.prisma.user.update({
+                    where: { id },
+                    data: { password: hashedPassword }
+                });
+            }
+            catch (error) {
+                console.error('updatePwd service error:', error);
+                throw new Error('Failed to update password');
+            }
+        });
+    }
+    updateUserRole(userId, role) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.prisma.user.update({
+                where: { id: userId },
+                data: { role },
             });
         });
     }
